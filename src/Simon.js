@@ -17,6 +17,13 @@ function Lense(props) {
     );
 }
 
+function ActiveLense(props) {
+    return (
+        <button className={props.class + "-active"}>
+        </button>
+    );
+}
+
 function Start(props) {
     return (
         <button onClick={props.onClick}>Start</button>
@@ -65,13 +72,12 @@ class Simon extends React.Component {
             add: true,
             fail: false,
             play: false,
-            speed: this.logic.calculatePlaybackSpeed(0),
         };
     }
 
     start() {
         this.logic.resetExpired();
-        this.logic.startTimer(this.tick.bind(this));
+        this.logic.startTimer(this.tick.bind(this), 0);
         this.sequence.reset();
 
         this.setState({...this.state,
@@ -80,72 +86,90 @@ class Simon extends React.Component {
             play: true,
             fail: false,
             highlight: false,
-            speed: this.logic.calculatePlaybackSpeed(0),
         });
     }
 
-    doPlayback() {
+    doPlayback(speed) {
         let playback = this.state.playback; // if we are still playing the sequence back
-        let speed = this.state.speed; // how many ticks to wait before we move to the next item in sequence
-        let highlight = this.state.highlight; // should we highlight the current item in sequence?
+        let highlight = this.state.highlight;
 
         if (speed === 0) {
             if (!this.sequence.getNext()) {
                 highlight = false;
                 playback = false;
-                this.sequence.resetPointer();
+                this.sequence.resetPointer(); // set the pointer back to home so we can press all the values.
                 this.logic.resetInerval(); // make sure we give players the full tiem interval to guess their number.
-            } else {
-                // when we increment the item we are highlighting we want to wait a tick before
-                // we highlight it to avoid one lone highlight for duplicate sequences.
-                highlight = false;
-                speed = this.logic.calculatePlaybackSpeed(this.sequence.getCount());
-                console.log("next with speed: " + speed);
             }
-        } else {
-            highlight = true;
-            speed--;
-        }
 
-        this.setState({...this.state,
-            playback,
-            speed,
-            highlight,
-        });
+            this.setState({...this.state,
+                playback,
+                highlight: false,
+            });
+        } else {
+            if (!highlight) {
+                // the first time we decrement the speed we let a playback tick where nothing is ighlighted happen
+                this.setState({...this.state,
+                    playback,
+                    speed,
+                    highlight: true,
+                });
+            }
+        }
     }
 
     doWait(expired) {
         // our interval handler gets called again with a different value after the first fail
         // and resets the timer if we don't check for fail to have already happend.
         let fail = expired || this.state.fail;
+        let win = false;
+
+        if (expired && this.state.mode === 2) { // color mode
+            this.addSkip(this.sequence.getCurrent()); // current player is eliminated for missing
+
+            fail = false;
+            expired = false;
+
+            if (this.sequence.getSkipCount() === 3) {
+                win = true;
+                expired = true;
+            }
+        }
 
         this.setState({...this.state,
+            win,
             fail,
             play: !expired && !fail,
         });
     }
 
     doAddValue(value) {
-        let speed = this.logic.calculatePlaybackSpeed(this.sequence.getCount());
-
         this.sequence.add(value); // adds a new random value to the sequence.
         this.sequence.resetPointer(); // resets the point for replay
 
         this.setState({...this.state,
             add: false,
-            speed: speed,
             playback: this.logic.isPlaybackMode(this.state.mode),
         });
     }
 
-    tick(expired) {
+
+    tick(speed, expired) {
+        if (!this.state.play || this.rendering) {
+            return; // skip all this if we are not playing.
+        }
+
         if (this.state.add) {
             this.doAddValue();
         } else if (this.state.playback) {
-            this.doPlayback();
+            this.doPlayback(speed);
         } else {
             this.doWait(expired);
         }
+    }
+
+    addSkip(value) {
+        this.sequence.addSkip(value);
+        this.sequence.reset(true); // reset the game but keep the skips
     }
 
     componentWillUnmount() {
@@ -184,44 +208,97 @@ class Simon extends React.Component {
         });
     }
 
-    handleClick(i) {
-        let fail = !this.sequence.matchesCurrent(i);
-        let win = !this.sequence.hasNext() && this.sequence.getCount() === this.logic.calculateMax();
-        let isPlayback = !this.sequence.hasNext() && this.logic.isPlaybackMode(this.state.mode); // no playback for player add mode.
+    handleSimonSaysClick(value) {
+        let fail = !this.sequence.matchesCurrent(value);
+        let win = !fail && !this.sequence.hasNext() & this.sequence.getCount() === this.logic.calculateMax();
+        let playback = !fail && !win && !this.sequence.getNext();
         let play = this.state.play;
 
-        this.logic.stopTimer();
+        this.setState({...this.state,
+            add: playback,
+            play: play && !fail,
+            playback,
+            fail,
+            win,
+        });
+    }
 
-        if (!win && !this.sequence.getNext() && this.state.mode === 1) {
-            // if we are at the current and our game mode is player add, we'll add the new, which will trigger a state event
-            this.doAddValue(i);
+    handlePlayerAddsCliek(value) {
+        let fail = !this.sequence.matchesCurrent(value);
+        let win = !fail && !this.sequence.hasNext() & this.sequence.getCount() === this.logic.calculateMax();
+        let playback = !fail && !win && !this.sequence.hasNext();
+        let play = this.state.play;
+
+        if (!win && !this.sequence.getNext()) {
+            this.doAddValue(value);
         } else {
             this.setState({...this.state,
-                playback: isPlayback,
-                add: isPlayback,
-                fail,
+                add: playback,
                 play: play && !fail,
-                win: !fail && win,
+                playback,
+                fail,
+                win,
             });
+        }
+    }
+
+    handleColorModeClick(value) {
+        let fail = !this.sequence.matchesCurrent(value);
+        let win = !this.sequence.hasNext() && this.sequence.getCount() === this.logic.calculateMax();
+        let playback = !this.sequence.hasNext() && this.logic.isPlaybackMode(this.state.mode); // no playback for player add mode.
+        let play = this.state.play;
+        let add = playback;
+
+        if (fail) {
+            this.addSkip(value);
+            if (this.sequence.getSkipCount() === 3) {
+                playback = false;
+                add = false;
+                fail = false;
+                play = false;
+                win = true;
+            } else {
+                playback = true;
+                add = true;
+                fail = false;
+                win = false;
+            }
+        }
+
+        this.setState({...this.state,
+            playback,
+            add,
+            fail,
+            play: play && !fail,
+            win: !fail && win,
+        });
+    }
+
+    handleClick(value) {
+        if (this.state.mode === 0) {
+            this.handleSimonSaysClick(value);
+        } else if (this.state.mode === 1) {
+            this.handlePlayerAddsCliek(value);
+        } else if (this.state.mode === 2) {
+            this.handleColorModeClick(value);
         }
     }
 
     renderLense(lenseClass, i) {
         let handleClick = this.handleClick.bind(this);
+        let onClick = () => {
+                handleClick(i);
+            };
+
         if (this.state.playback) {
-            handleClick = () => {}; // do nothing if we are playing back
+            onClick = undefined; // do nothing if we are playing back
         }
 
         if (this.state.highlight && this.sequence.matchesCurrent(i)) {
-            lenseClass = lenseClass + "-active";
+            return (<ActiveLense class={lenseClass} />);
+        } else {
+            return (<Lense class={lenseClass} onClick={onClick} />);
         }
-
-        return (
-            <Lense
-            class={lenseClass}
-            onClick={() => handleClick(i)}
-            />
-        );
     }
 
     renderModeSelect() {
@@ -254,6 +331,7 @@ class Simon extends React.Component {
 
     render() {
         let status;
+        let count = this.sequence.getCount();
 
         if (this.state.win) {
             status = 'You Win!';
@@ -262,10 +340,7 @@ class Simon extends React.Component {
             status = 'Start Over!';
             // todo - play sound
         } else {
-            status = 'Total: ' + (this.sequence.getCount());
-            if (this.state.play) {
-                this.logic.startTimer(this.tick.bind(this));
-            }
+            status = 'Total: ' + count;
         }
 
         return (

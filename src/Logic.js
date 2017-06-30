@@ -1,15 +1,17 @@
 class Logic {
     constructor() {
-        this.timerDuration = 250; // milliseconds between timer calls
-        this.maxInterval = 20; // maximum number of timer calls to wait. (is 5 seconds)
+        this.timerDuration = 200; // milliseconds between timer calls
+        this.maxInterval = 50; // maximum number of timer calls to wait. (is 5 seconds)
         this.waitInterval = 0;
         this.expired = false;
         this.level = 0;
+        this.speed = 0;
+        this.elapsed = 0;
     }
 
     calculatePlaybackSpeed(count) {
         if (count > 13) {
-            return 2
+            return 2;
         } else if (count > 9) {
             return 3;
         } else if (count > 5) {
@@ -29,11 +31,18 @@ class Logic {
     incrementInterval(intervalHandler) {
         if (this.waitInterval >= this.maxInterval) {
             this.stopTimer();
-            intervalHandler(true); // time expired is true
+            intervalHandler(0, true); // time expired is true
         }
 
         this.waitInterval++;
-        return intervalHandler(this.expired || false); // time expired is false
+
+        if (this.elapsed === this.speed) {
+            this.elapsed = 0;
+        } else {
+            this.elapsed++;
+        }
+
+        intervalHandler(this.speed - this.elapsed, this.expired || false); // time expired is false
     }
 
     resetInerval() {
@@ -54,8 +63,6 @@ class Logic {
     }
 
     isPlaybackMode(mode) {
-        console.log("mode");
-        console.log(mode);
         return mode !== 1; // mode one (Player Add Mode) does not do playback, but the player adds the next value.
     }
 
@@ -63,10 +70,12 @@ class Logic {
         return current >= this.calculateMax(this.level);
     }
 
-    startTimer(intervalHandler) {
+    startTimer(intervalHandler, count) {
         if (!this.timer) {
             this.resetInerval();
             this.timer = setInterval(() => {this.incrementInterval(intervalHandler)}, this.timerDuration);
+            this.speed = this.calculatePlaybackSpeed(count);
+            this.elapsed = 0;
         }
     }
 };

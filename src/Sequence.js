@@ -3,19 +3,17 @@ class Sequence {
         this.current = [];
         this.last = [];
         this.longest = [];
+        this.excludes = [];
         this.pointer = 0;
         this.count = 0;
     }
 
-    getRandomSequenceNumber(excluded) {
+    getRandomSequenceNumber() {
         let newVal = -1;
-        if (excluded === undefined || excluded === null) {
-            excluded = [];
-        }
 
-        while(true) {
+        while(true) { // only generate numbers that are not excluded
             newVal = Math.floor(Math.random() * 4);
-            if (!excluded.includes(newVal)) {
+            if (!this.excludes.includes(newVal)) {
                 return newVal;
             }
         }
@@ -48,9 +46,7 @@ class Sequence {
 
     add(value, excluded) {
         if (value === undefined) {
-            console.log("adding new value");
             this.current.push(this.getRandomSequenceNumber(excluded));
-            console.log(this.current);
         } else {
             this.current.push(value);
         }
@@ -58,11 +54,14 @@ class Sequence {
         this.count = this.current.length;
     }
 
-    reset() {
+    reset(saveSkips) {
         this.last = this.current;
         this.current = [];
         this.pointer = 0;
         this.count = 0;
+        if (!saveSkips) {
+            this.excludes = [];
+        }
     }
 
     matchesCurrent(value) {
@@ -83,6 +82,18 @@ class Sequence {
 
     getCount() {
         return this.count;
+    }
+
+    addSkip(value) {
+        this.excludes.push(value);
+    }
+
+    getSkipCount() {
+        return this.excludes.length;
+    }
+
+    clearSkips() {
+        this.excludes = [];
     }
 }
 
