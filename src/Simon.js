@@ -1,5 +1,6 @@
 import React from 'react';
 import Logic from './Logic';
+import Sequence from './Sequence';
 
 import './index.css';
 
@@ -26,7 +27,7 @@ function Level(props) {
     return (
         <div>
         <span>Level </span>
-        <select onChange={(evt) => props.onChange(evt)}>
+        <select onChange={(evt) => props.onChange(evt)} value={props.level} disabled={props.isDisabled}>
             <option value="0">1</option>
             <option value="1">2</option>
             <option value="2">3</option>
@@ -40,32 +41,28 @@ function Mode(props) {
     return (
         <div>
             <span>Mode </span>
-            <select onChange={(evt) => props.onChange(evt)}>
-                <option value="0">1</option>
-                <option value="1">2</option>
-                <option value="2">3</option>
+            <select onChange={(evt) => props.onChange(evt)} value={props.mode} disabled={props.isDisabled}>
+                <option value="0">Simon Says</option>
+                <option value="1">Player Adds</option>
+                <option value="2">Chose Your Color</option>
             </select>
         </div>
-    )
+    );
 }
-
-const ADD_TO_SEQUENCE_SIGNAL = -1;
 
 class Simon extends React.Component {
     constructor() {
         super();
 
         this.logic = new Logic();
+        this.sequence = new Sequence();
 
         this.state = {
             level: 0,
-            max: this.logic.calculateMax(0), // this is the maximum number of values to remember
-            mode: null, // todo: we will use this for game modes
+            mode: 0,
             playback: true, // when true simon is playing the pattern to be remembered
             highlight: false,
-            order: [],
-            current: ADD_TO_SEQUENCE_SIGNAL,
-            count: 0,
+            add: true,
             fail: false,
             play: false,
             speed: this.logic.calculatePlaybackSpeed(0),
@@ -75,38 +72,35 @@ class Simon extends React.Component {
     start() {
         this.logic.resetExpired();
         this.logic.startTimer(this.tick.bind(this));
+        this.sequence.reset();
 
         this.setState({...this.state,
-            current: ADD_TO_SEQUENCE_SIGNAL,
+            add: true,
             playback: true,
-            max: this.logic.calculateMax(this.state.level),
             play: true,
             fail: false,
             highlight: false,
-            order: [],
-            count: 0,
             speed: this.logic.calculatePlaybackSpeed(0),
         });
     }
 
     doPlayback() {
-        let current = this.state.current; // the current item in the sequcne
         let playback = this.state.playback; // if we are still playing the sequence back
         let speed = this.state.speed; // how many ticks to wait before we move to the next item in sequence
         let highlight = this.state.highlight; // should we highlight the current item in sequence?
 
         if (speed === 0) {
-            if (current === this.state.order.length - 1) {
-                current = 0;
+            if (!this.sequence.getNext()) {
                 highlight = false;
                 playback = false;
+                this.sequence.resetPointer();
                 this.logic.resetInerval(); // make sure we give players the full tiem interval to guess their number.
             } else {
                 // when we increment the item we are highlighting we want to wait a tick before
                 // we highlight it to avoid one lone highlight for duplicate sequences.
                 highlight = false;
-                current++;
-                speed = this.logic.calculatePlaybackSpeed(this.state.count);
+                speed = this.logic.calculatePlaybackSpeed(this.sequence.getCount());
+                console.log("next with speed: " + speed);
             }
         } else {
             highlight = true;
@@ -114,7 +108,6 @@ class Simon extends React.Component {
         }
 
         this.setState({...this.state,
-            current,
             playback,
             speed,
             highlight,
@@ -128,25 +121,25 @@ class Simon extends React.Component {
 
         this.setState({...this.state,
             fail,
-            play: !expired,
+            play: !expired && !fail,
         });
     }
 
-    doAddValue() {
-        let order = this.logic.addToSequence(this.state.order.slice());
-        let speed = this.logic.calculatePlaybackSpeed(order.length);
+    doAddValue(value) {
+        let speed = this.logic.calculatePlaybackSpeed(this.sequence.getCount());
+
+        this.sequence.add(value); // adds a new random value to the sequence.
+        this.sequence.resetPointer(); // resets the point for replay
 
         this.setState({...this.state,
-            order,
-            count: order.length,
-            current: 0,
+            add: false,
             speed: speed,
-            playback: true,
+            playback: this.logic.isPlaybackMode(this.state.mode),
         });
     }
 
     tick(expired) {
-        if (this.state.current === ADD_TO_SEQUENCE_SIGNAL) {
+        if (this.state.add) {
             this.doAddValue();
         } else if (this.state.playback) {
             this.doPlayback();
@@ -160,29 +153,57 @@ class Simon extends React.Component {
     }
 
     handleLevelChange(evt) {
-        const newLevel = parseInt(evt.target.value);
+        // base 10 integer
+        const newLevel = parseInt(evt.target.value, 10);
+        let mode = this.state.mode;
+        this.logic.setLevel(newLevel);
+
+        if (newLevel < 3) {
+            mode = 0;
+        }
 
         this.setState({...this.state,
             level: newLevel,
-            max: this.logic.calculateMax(newLevel),
+            mode,
+        });
+    }
+
+    handleModeChange(evt) {
+        // base 10 integer
+        const newMode = parseInt(evt.target.value, 10);
+        let level = this.state.level;
+
+        if (newMode > 0) {
+            level = 3;
+            this.logic.setLevel(level);
+        }
+
+        this.setState({...this.state,
+            mode: newMode,
+            level,
         });
     }
 
     handleClick(i) {
-        let current = this.state.current;
-        let fail = this.state.order[current] !== i;
-        let newCurrent = current + 1;
-        let isPlayback = newCurrent === this.state.count;
-        let win = newCurrent === this.state.max;
+        let fail = !this.sequence.matchesCurrent(i);
+        let win = !this.sequence.hasNext() && this.sequence.getCount() === this.logic.calculateMax();
+        let isPlayback = !this.sequence.hasNext() && this.logic.isPlaybackMode(this.state.mode); // no playback for player add mode.
+        let play = this.state.play;
 
         this.logic.stopTimer();
 
-        this.setState({...this.state,
-            playback: isPlayback,
-            current: isPlayback? ADD_TO_SEQUENCE_SIGNAL : newCurrent,
-            fail,
-            win: !fail && win,
-        });
+        if (!win && !this.sequence.getNext() && this.state.mode === 1) {
+            // if we are at the current and our game mode is player add, we'll add the new, which will trigger a state event
+            this.doAddValue(i);
+        } else {
+            this.setState({...this.state,
+                playback: isPlayback,
+                add: isPlayback,
+                fail,
+                play: play && !fail,
+                win: !fail && win,
+            });
+        }
     }
 
     renderLense(lenseClass, i) {
@@ -191,7 +212,7 @@ class Simon extends React.Component {
             handleClick = () => {}; // do nothing if we are playing back
         }
 
-        if (this.state.highlight && this.state.order[this.state.current] === i) {
+        if (this.state.highlight && this.sequence.matchesCurrent(i)) {
             lenseClass = lenseClass + "-active";
         }
 
@@ -203,11 +224,17 @@ class Simon extends React.Component {
         );
     }
 
+    renderModeSelect() {
+        return (
+            <Mode onChange={this.handleModeChange.bind(this)} mode={this.state.mode} isDisabled={this.state.play} />
+        );
+    }
+
     renderLevelSelect() {
         let handleLevelChange = this.handleLevelChange.bind(this);
 
         return (
-            <Level onChange={handleLevelChange} />
+            <Level onChange={handleLevelChange} level={this.state.level} isDisabled={this.state.play} />
         );
     }
 
@@ -235,7 +262,7 @@ class Simon extends React.Component {
             status = 'Start Over!';
             // todo - play sound
         } else {
-            status = 'Total: ' + (this.state.current);
+            status = 'Total: ' + (this.sequence.getCount());
             if (this.state.play) {
                 this.logic.startTimer(this.tick.bind(this));
             }
@@ -246,6 +273,7 @@ class Simon extends React.Component {
                 <div className="status">{status}</div>
                 {this.renderStart()}
                 {this.renderLevelSelect()}
+                {this.renderModeSelect()}
                 <div className="board-row">
                     {this.renderLense("lense top-left", 0)}
                     {this.renderBorder("border border-vertical")}
@@ -263,9 +291,10 @@ class Simon extends React.Component {
                 </div>
                 <div>
                     level: {this.state.level + 1}<br />
-                    max: {this.state.max}<br />
+                    max: {this.logic.calculateMax()}<br />
                     playback: {this.state.playback? "true" : "false"}<br />
-                    order: {this.state.order.length}<br />
+                    play: {this.state.play? "true" : "false"}<br />
+                    order: {this.sequence.getCount()}<br />
                     current: {this.state.current}<br />
                     fail: {this.state.fail}<br />
                     speed: {this.state.speed}<br />
