@@ -5,7 +5,6 @@ class Sequence {
         this.longest = [];
         this.excludes = [];
         this.pointer = 0;
-        this.count = 0;
     }
 
     getRandomSequenceNumber() {
@@ -13,14 +12,15 @@ class Sequence {
 
         while(true) { // only generate numbers that are not excluded
             newVal = Math.floor(Math.random() * 4);
-            if (!this.excludes.includes(newVal)) {
+            console.log("trying to add " + newVal);
+            if (this.getSkipCount() === 0 || !this.excludes.includes(newVal)) {
                 return newVal;
             }
         }
     }
 
     getCurrent() {
-        if (this.count > this.pointer) {
+        if (this.getCount() > this.pointer) {
             return this.current[this.pointer];
         }
 
@@ -37,20 +37,23 @@ class Sequence {
     }
 
     hasNext() {
-        return this.count > this.pointer + 1;
+        return this.getCount() > this.pointer + 1;
     }
 
     resetPointer() {
         this.pointer = 0;
     }
 
-    add(value, excluded) {
+    add(value) {
+        const current = this.current.slice();
+
         if (value === undefined) {
-            this.current.push(this.getRandomSequenceNumber(excluded));
+            current.push(this.getRandomSequenceNumber());
         } else {
-            this.current.push(value);
+            current.push(value);
         }
 
+        this.current = current;
         this.count = this.current.length;
     }
 
@@ -58,8 +61,8 @@ class Sequence {
         this.last = this.current;
         this.current = [];
         this.pointer = 0;
-        this.count = 0;
         if (!saveSkips) {
+            console.log("clearing skips");
             this.excludes = [];
         }
     }
@@ -81,10 +84,11 @@ class Sequence {
     }
 
     getCount() {
-        return this.count;
+        return this.current.length;
     }
 
     addSkip(value) {
+        console.log("adding skip " + value);
         this.excludes.push(value);
     }
 
