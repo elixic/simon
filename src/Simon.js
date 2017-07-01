@@ -1,7 +1,10 @@
 import React from 'react';
+import Sound from 'react-sound';
+
 import Logic from './Logic';
 import PlaybackTimer from './PlaybackTimer';
 import WaitTimer from './WaitTimer';
+import BlinkTimer from './BlinkTimer';
 import Sequence from './Sequence';
 
 import './index.css';
@@ -67,6 +70,7 @@ class Simon extends React.Component {
         this.sequence = new Sequence();
         this.playbackTimer = new PlaybackTimer();
         this.waitTimer = new WaitTimer();
+        this.blinkTimer = new BlinkTimer();
 
         this.state = {
             level: 0,
@@ -93,6 +97,10 @@ class Simon extends React.Component {
 
         this.doAddValue();
         this.doPlayback();
+    }
+
+    handleSoundFinished() {
+        console.log("Sound done playing");
     }
 
     doPlayback() {
@@ -160,8 +168,6 @@ class Simon extends React.Component {
         this.sequence.resetPointer(); // resets the point for replay
     }
 
-    componentWillUnmount() {
-    }
 
     handleLevelChange(evt) {
         // base 10 integer
@@ -176,6 +182,7 @@ class Simon extends React.Component {
         this.setState({...this.state,
             level: newLevel,
             mode,
+            fail: false,
         });
     }
 
@@ -192,6 +199,7 @@ class Simon extends React.Component {
         this.setState({...this.state,
             mode: newMode,
             level,
+            fail: false,
         });
     }
 
@@ -252,13 +260,35 @@ class Simon extends React.Component {
         if (this.sequence.getSkipCount() < 3) {
             this.start(true);
         } else {
+            this.handleColorModeWin();
+        }
+    }
+
+    handleColorModeWin() {
+        let blink = () => {
             this.setState({
-                ...this.state,
-                win: true, // the remaining plyaer is the winner (most likely...)
+                ...this.status,
+                highlight: true,
+                win: true,
                 fail: false,
                 play: false,
             });
         }
+
+        let pause = () => {
+            this.setState({
+                ...this.status,
+                highlight: false,
+                win: true,
+                fail: false,
+                play: false,
+            });
+        }
+
+        // we'll set it so the only value that is avaialble for highlighting is the winning value.
+        this.sequence.reset(true);
+        this.sequence.add();
+        this.blinkTimer.blink(blink, pause);
     }
 
     handleColorModeClick(value) {
@@ -273,10 +303,12 @@ class Simon extends React.Component {
             if (fail) {
                 this.handleColorModeClickFailure(value);
             } else {
+                // if we win due to reachign the end it's a draw and all remaining players "win"
                 this.setState({
-                    ...this.state,
-                    win,
-                    fail,
+                    ...this.status,
+                    highlight: false,
+                    win: true,
+                    fail: false,
                     play: false,
                 });
             }
@@ -350,20 +382,29 @@ class Simon extends React.Component {
         );
     }
 
+    renderJazz() {
+        return (
+            <Sound url={process.env.PUBLIC_URL + "/wrong-answer.mp3"}
+                playStatus={this.state.fail? Sound.status.PLAYING : Sound.status.STOPPED}
+                volume={25}
+                onFinishedPlaying={() => this.handleSoundFinished()}
+                />
+        );
+    }
+
     render() {
         let count = this.sequence.getCount();
         let status = 'Total: ' + count;
 
         if (this.state.win) {
             status = 'You Win!';
-            // todo - play sound
         } else if (this.state.fail) {
             status = 'Start Over!';
-            // todo - play sound
         }
 
         return (
             <div>
+                {this.renderJazz()}
                 <div className="status">{status}</div>
                 {this.renderStart()}
                 {this.renderLevelSelect()}

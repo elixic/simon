@@ -12,7 +12,6 @@ class Sequence {
 
         while(true) { // only generate numbers that are not excluded
             newVal = Math.floor(Math.random() * 4);
-            console.log("trying to add " + newVal);
             if (this.getSkipCount() === 0 || !this.excludes.includes(newVal)) {
                 return newVal;
             }
@@ -62,7 +61,6 @@ class Sequence {
         this.current = [];
         this.pointer = 0;
         if (!saveSkips) {
-            console.log("clearing skips");
             this.excludes = [];
         }
     }
@@ -88,8 +86,9 @@ class Sequence {
     }
 
     addSkip(value) {
-        console.log("adding skip " + value);
-        this.excludes.push(value);
+        if (!this.excludes.includes(value)) {
+            this.excludes.push(value);
+        }
     }
 
     getSkipCount() {

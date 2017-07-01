@@ -47,8 +47,7 @@ class PlaybackTimer {
         };
 
         this.stop(); // ensure there is no other timer running.
-
-        console.log("Starting playback timer...");
+        
         // wait for a bit when we start to give a lil gap between the last button press and
         // playing the next sequence back.
         this.timer = setTimeout(start, 200);
