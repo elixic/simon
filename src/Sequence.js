@@ -95,7 +95,11 @@ class Sequence {
     moveNext() {
         if (this.hasNext()) {
             this.pointer++;
+
+            return true;
         }
+
+        return false;
     }
 
     getCount() {

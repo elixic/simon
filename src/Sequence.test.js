@@ -6,7 +6,7 @@ it('can be constructed without error', () => {
 });
 
 it('will add a random value between 0 and 3 when add is called without an argument', () => {
-    const instance = new Sequence();
+    let instance = new Sequence();
     const count = 50;
 
     for(let i = 0; i < count; i++) {
@@ -22,7 +22,7 @@ it('will add a random value between 0 and 3 when add is called without an argume
 });
 
 it('will add a random value between 0 and 3 excluding values that are added to the skip list when add is called without an argument', () => {
-    const instance = new Sequence();
+    let instance = new Sequence();
     const count = 250;
 
     instance.addSkip(0);
@@ -42,7 +42,7 @@ it('will add a random value between 0 and 3 excluding values that are added to t
 });
 
 it('can have a value between 0 and 3 added', () => {
-    const instance = new Sequence();
+    let instance = new Sequence();
     for(let i = -1; i < 5; i++) {
         instance.add(i);
     }
@@ -51,7 +51,7 @@ it('can have a value between 0 and 3 added', () => {
 });
 
 it('can return the current number in the sequence repeatedly', () => {
-    const instance = new Sequence();
+    let instance = new Sequence();
     for(let i = 0; i < 4; i++) {
         instance.add(i);
     }
@@ -62,7 +62,7 @@ it('can return the current number in the sequence repeatedly', () => {
 });
 
 it('can return the next number in the sequence', () => {
-    const instance = new Sequence();
+    let instance = new Sequence();
     for(let i = 0; i < 4; i++) {
         instance.add(i);
     }
@@ -73,30 +73,48 @@ it('can return the next number in the sequence', () => {
     expect(instance.getNext()).toEqual(3);
 });
 
-it('will return all values added to a sequence', () => {
-    const instance = new Sequence();
-    const source = [0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3];
+it('has next will return true until there are no more items in the sequcne', () => {
+    let instance = new Sequence();
+    const count = 250;
 
-    for(let i = 0; i < source.length; i++) {
-        instance.add(source[i]);
+    for(let i = 0; i < count; i++) {
+        instance.add();
+    }
+
+    for(let i = 0; i < count; i++) {
+        expect(instance.hasNext()).toBeTruthy();
+        instance.moveNext();
+    }
+});
+
+it('will return all values added to a sequence', () => {
+    let instance = new Sequence();
+    const source = [0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3];
+    let position = 0;
+
+    for(let position = 0; position < source.length; position++) {
+        instance.add(source[position]);
     }
 
     expect(instance.getCount()).toEqual(source.length);
 
-    for(let i = 0; instance.hasNext(); instance.moveNext(), i++) {
-        expect(instance.getCurrent()).toEqual(source[i]);
+    for(let position = 0; instance.hasNext(); instance.moveNext(), position++) {
+        expect(instance.getCurrent()).toEqual(source[position]);
     }
+
+    expect(instance.hasNext()).not.toBeTruthy();
+    expect(position + 1).toEqual(instance.getCount());
 });
 
 it('will return undefined when calling get current on an empty sequence', () => {
-    const instance = new Sequence();
+    let instance = new Sequence();
 
     expect(instance.getCurrent()).toBeUndefined();
 
 });
 
 it('will return undefined when no there is no next number in the sequence', () => {
-    const instance = new Sequence();
+    let instance = new Sequence();
 
     // calling get next on an empty sequence is the same as calling get next at the end of a sequence
     expect(instance.getNext()).toBeUndefined();
@@ -109,7 +127,7 @@ it('will return undefined when no there is no next number in the sequence', () =
 });
 
 it('can have the current postion be reset', () => {
-    const instance = new Sequence();
+    let instance = new Sequence();
     for(let i = 0; i < 4; i++) {
         instance.add(i);
     }
@@ -130,7 +148,7 @@ it('can have the current postion be reset', () => {
 });
 
 it('can have the sequence reset', () => {
-    const instance = new Sequence();
+    let instance = new Sequence();
     const count = 4;
     for(let i = 0; i < count; i++) {
         instance.add(i);
@@ -146,7 +164,7 @@ it('can have the sequence reset', () => {
 });
 
 it('can have the sequence reset while maintating the skip list', () => {
-    const instance = new Sequence();
+    let instance = new Sequence();
     const count = 250;
 
     instance.addSkip(0);
@@ -181,7 +199,7 @@ it('can have the sequence reset while maintating the skip list', () => {
 });
 
 it('can recall the previous sequence', () => {
-    const instance = new Sequence();
+    let instance = new Sequence();
     const count = 25;
     let previous = [];
     let position = 0;
@@ -193,11 +211,11 @@ it('can recall the previous sequence', () => {
 
     expect(instance.getCount()).toEqual(count);
 
-    while(instance.getCurrent()) {
+    for(; instance.hasNext(); instance.moveNext(), position++) {
         previous.push(instance.getCurrent());
-        instance.moveNext();
     }
 
+    expect(previous.length).toEqual(position + 1);
     expect(previous.length).toEqual(instance.getCount());
 
     instance.reset();
