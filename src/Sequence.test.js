@@ -81,8 +81,8 @@ it('has next will return true until there are no more items in the sequcne', () 
         instance.add();
     }
 
-    for(let i = 0; i < count; i++) {
-        expect(instance.hasNext()).toBeTruthy();
+    for(let i = 0; i < count - 1; i++) {
+        expect(instance.hasNext()).toEqual(true);
         instance.moveNext();
     }
 });
@@ -98,9 +98,11 @@ it('will return all values added to a sequence', () => {
 
     expect(instance.getCount()).toEqual(source.length);
 
-    for(let position = 0; instance.hasNext(); instance.moveNext(), position++) {
-        expect(instance.getCurrent()).toEqual(source[position]);
-    }
+    position = 0;
+    do {
+        expect(instance.getCurrent()).toEqual(source[position++]);
+        instance.moveNext();
+    } while(instance.hasNext());
 
     expect(instance.hasNext()).not.toBeTruthy();
     expect(position + 1).toEqual(instance.getCount());
@@ -178,7 +180,7 @@ it('can have the sequence reset while maintating the skip list', () => {
     do {
         expect(instance.getCurrent()).toBeGreaterThan(0);
         expect(instance.getCurrent()).toBeLessThan(4);
-    } while(instance.getNext());
+    } while(instance.getNext() !== undefined);
 
     instance.reset(true);
 
@@ -194,13 +196,13 @@ it('can have the sequence reset while maintating the skip list', () => {
     do {
         expect(instance.getCurrent()).toBeGreaterThan(0);
         expect(instance.getCurrent()).toBeLessThan(4);
-    } while(instance.getNext());
+    } while(instance.getNext() !== undefined);
 
 });
 
 it('can recall the previous sequence', () => {
     let instance = new Sequence();
-    const count = 25;
+    const count = 250;
     let previous = [];
     let position = 0;
     let str = "";
@@ -211,11 +213,10 @@ it('can recall the previous sequence', () => {
 
     expect(instance.getCount()).toEqual(count);
 
-    for(; instance.hasNext(); instance.moveNext(), position++) {
+    do {
         previous.push(instance.getCurrent());
-    }
+    } while(instance.moveNext())
 
-    expect(previous.length).toEqual(position + 1);
     expect(previous.length).toEqual(instance.getCount());
 
     instance.reset();
@@ -227,5 +228,40 @@ it('can recall the previous sequence', () => {
 
     do {
         expect(instance.getCurrent()).toEqual(previous[position++]);
-    } while(instance.getNext());
+    } while(instance.moveNext());
+});
+
+it('can recall the previous longest sequence', () => {
+    let instance = new Sequence();
+    const shortCount = 100;
+    const longCount = 250;
+    let longest = [];
+    let position = 0;
+    let str = "";
+
+    for(let i = 0; i < longCount; i++) {
+        instance.add();
+    }
+
+    expect(instance.getCount()).toEqual(longCount);
+
+    do {
+        longest.push(instance.getCurrent());
+    } while(instance.moveNext());
+
+    expect(longest.length).toEqual(instance.getCount());
+
+    instance.reset();
+    for(let i = 0; i < shortCount; i++) {
+        instance.add();
+    }
+
+    expect(instance.getCount()).toEqual(shortCount);
+    expect(instance.loadLongest()).toBeTruthy();
+    expect(instance.getCount()).toEqual(longest.length);
+    instance.resetPointer();
+
+    do {
+        expect(instance.getCurrent()).toEqual(longest[position++]);
+    } while(instance.moveNext());
 });
