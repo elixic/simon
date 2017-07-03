@@ -1,6 +1,8 @@
 import React from 'react';
 import Sound from 'react-sound';
 
+import Lense from './Lense';
+
 import Logic from './Logic';
 import PlaybackTimer from './PlaybackTimer';
 import WaitTimer from './WaitTimer';
@@ -12,13 +14,6 @@ import './index.css';
 function Border(props) {
     return (
         <div className={props.class}></div>
-    );
-}
-
-function Lense(props) {
-    return (
-        <button className={props.class} onClick={props.onClick}>
-        </button>
     );
 }
 
@@ -337,21 +332,17 @@ class Simon extends React.Component {
         }
     }
 
-    renderLense(lenseClass, i) {
+    renderLense(position, i) {
+        let active = this.state.highlight && this.sequence.matchesCurrent(i);
         let handleClick = this.handleClick.bind(this);
         let onClick = () => {
-                handleClick(i);
-            };
+            handleClick(i);
+        };
 
-        if (this.state.playback) {
-            onClick = undefined; // do nothing if we are playing back
-        }
+        console.log('active: ' + active);
+        console.log('postion: ' + position);
 
-        if (this.state.highlight && this.sequence.matchesCurrent(i)) {
-            return (<ActiveLense class={lenseClass} />);
-        } else {
-            return (<Lense class={lenseClass} onClick={onClick} />);
-        }
+        return (<Lense position={position} active={active} onClick={onClick} />);
     }
 
     renderModeSelect() {
@@ -410,9 +401,9 @@ class Simon extends React.Component {
                 {this.renderLevelSelect()}
                 {this.renderModeSelect()}
                 <div className="board-row">
-                    {this.renderLense("lense top-left", 0)}
+                    {this.renderLense("tl", 0)}
                     {this.renderBorder("border border-vertical")}
-                    {this.renderLense("lense top-right", 1)}
+                    {this.renderLense("tr", 1)}
                 </div>
                 <div className="board-row">
                     {this.renderBorder("border border-horizontal")}
@@ -420,9 +411,9 @@ class Simon extends React.Component {
                     {this.renderBorder("border border-horizontal")}
                 </div>
                 <div className="board-row">
-                    {this.renderLense("lense bottom-left", 2)}
+                    {this.renderLense("bl", 2)}
                     {this.renderBorder("border border-vertical")}
-                    {this.renderLense("lense bottom-right", 3)}
+                    {this.renderLense("br", 3)}
                 </div>
             </div>
         );

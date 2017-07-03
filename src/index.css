@@ -44,68 +44,80 @@ ol, ul {
     width: 200px;
 }
 
+.lense.red {
+    background-color: rgb(235, 5, 5);
+}
+
+.lense.blue {
+    background-color: rgb(5, 5, 205);
+}
+
+.lense.green {
+    background-color: rgb(5, 235, 5);
+}
+
+.lense.yellow {
+    background-color: rgb(235, 235, 5);
+}
+
+.lense.red:active {
+    background-color: rgb(255, 0, 0);
+}
+
+.lense.red-active {
+    background-color: rgb(255, 0, 0);
+}
+
+.lense.green:active {
+    background-color: rgb(0, 255, 0);
+}
+
+.lense.green-active {
+    background-color: rgb(0, 255, 0);
+}
+
+.lense.yellow:active {
+    background-color: rgb(255, 255, 0);
+}
+
+.lense.yellow-active {
+    background-color: rgb(255, 255, 0);
+}
+
+.lense.blue:active {
+    background-color: rgb(0, 0, 255);
+}
+
+.lense.blue-active {
+    background-color: rgb(0, 0, 255);
+}
+
 .top-left {
     border-top: 15px solid black;
     border-left: 15px solid black;
     border-top-left-radius: 100%;
-    background-color: rgb(235, 5, 5);
 }
 
 .top-right {
     border-top: 15px solid black;
     border-right: 15px solid black;
     border-top-right-radius: 100%;
-    background-color: rgb(5, 235, 5);
 }
 
 .bottom-left {
     border-bottom: 15px solid black;
     border-left: 15px solid black;
     border-bottom-left-radius: 100%;
-    background-color: rgb(235, 235, 5);
 }
 
 .bottom-right {
     border-bottom: 15px solid black;
     border-right: 15px solid black;
     border-bottom-right-radius: 100%;
-    background-color: rgb(5, 5, 205);
 }
 
 .lense:focus {
     outline: none;
-}
-
-.top-left:active {
-    background-color: rgb(255, 0, 0);
-}
-
-.top-left-active {
-    background-color: rgb(255, 0, 0);
-}
-
-.top-right:active {
-    background-color: rgb(0, 255, 0);
-}
-
-.top-right-active {
-    background-color: rgb(0, 255, 0);
-}
-
-.bottom-left:active {
-    background-color: rgb(255, 255, 0);
-}
-
-.bottom-left-active {
-    background-color: rgb(255, 255, 0);
-}
-
-.bottom-right:active {
-    background-color: rgb(0, 0, 255);
-}
-
-.bottom-right-active {
-    background-color: rgb(0, 0, 255);
 }
 
 .kbd-navigation .lense:focus {
