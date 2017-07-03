@@ -73,7 +73,7 @@ it('can return the next number in the sequence', () => {
     expect(instance.getNext()).toEqual(3);
 });
 
-it('will reeturn all values added to a sequence', () => {
+it('will return all values added to a sequence', () => {
     const instance = new Sequence();
     const source = [0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3];
 
@@ -83,9 +83,8 @@ it('will reeturn all values added to a sequence', () => {
 
     expect(instance.getCount()).toEqual(source.length);
 
-    for(let i = 0; i < source.length; i++) {
+    for(let i = 0; instance.hasNext(); instance.moveNext(), i++) {
         expect(instance.getCurrent()).toEqual(source[i]);
-        instance.moveNext();
     }
 });
 
