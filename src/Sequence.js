@@ -1,3 +1,14 @@
+const MIN_VALID_VALUE = 0;
+const MAX_VALID_VALUE = 3;
+
+function isValidValue(value) {
+    if (typeof value === 'number' && isFinite(value) && value === Math.floor(value)) {
+        return value >= MIN_VALID_VALUE && value <= MAX_VALID_VALUE;
+    }
+
+    return false;
+}
+
 class Sequence {
     constructor() {
         this.current = [];
@@ -48,17 +59,18 @@ class Sequence {
 
         if (value === undefined) {
             current.push(this.getRandomSequenceNumber());
-        } else {
+        } else if (isValidValue(value)){
             current.push(value);
         }
 
+        this.current = current;
+
         // this stores the most recent longest sequence
-        if (current.length >= this.longest.length) {
-            this.longest = current;
+        if (this.current.length >= this.longest.length) {
+            this.longest = this.current.slice();
         }
 
-        this.last = current;
-        this.current = current;
+        this.last = this.current.slice(); // copy the current values to the last values.
         this.count = this.current.length;
     }
 
@@ -111,7 +123,7 @@ class Sequence {
 
     loadLast() {
         if (this.hasLast()) {
-            this.current = this.last;
+            this.current = this.last.slice();;
             this.pointer = 0;
             this.excludes = [];
 
@@ -123,7 +135,7 @@ class Sequence {
 
     loadLongest() {
         if (this.hasLast()) {
-            this.current = this.longest;
+            this.current = this.longest.slice();
             this.pointer = 0;
             this.excludes = [];
 
