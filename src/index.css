@@ -44,6 +44,11 @@ ol, ul {
     width: 200px;
 }
 
+.play-button {
+    float: left;
+    padding-right: 5px;
+}
+
 .lense.red {
     background-color: rgb(235, 5, 5);
 }

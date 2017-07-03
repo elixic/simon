@@ -52,12 +52,17 @@ class Sequence {
             current.push(value);
         }
 
+        // this stores the most recent longest sequence
+        if (current.length >= this.longest.length) {
+            this.longest = current;
+        }
+
+        this.last = current;
         this.current = current;
         this.count = this.current.length;
     }
 
     reset(saveSkips) {
-        this.last = this.current;
         this.current = [];
         this.pointer = 0;
         if (!saveSkips) {
@@ -97,6 +102,35 @@ class Sequence {
 
     clearSkips() {
         this.excludes = [];
+    }
+
+    hasLast() {
+        return (this.last && this.last.length) ||
+            (this.longest && this.longest.length);
+    }
+
+    loadLast() {
+        if (this.hasLast()) {
+            this.current = this.last;
+            this.pointer = 0;
+            this.excludes = [];
+
+            return true;
+        }
+
+        return false;
+    }
+
+    loadLongest() {
+        if (this.hasLast()) {
+            this.current = this.longest;
+            this.pointer = 0;
+            this.excludes = [];
+
+            return true;
+        }
+
+        return false;
     }
 }
 

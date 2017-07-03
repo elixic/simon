@@ -17,9 +17,9 @@ function Border(props) {
     );
 }
 
-function Start(props) {
+function Play(props) {
     return (
-        <button onClick={props.onClick}>Start</button>
+        <button className="play-button" onClick={props.onClick} disabled={props.isDisabled}>{props.name}</button>
     );
 }
 
@@ -87,11 +87,35 @@ class Simon extends React.Component {
         this.doPlayback();
     }
 
-    handleSoundFinished() {
-        console.log("Sound done playing");
+    replayLast() {
+        if (this.sequence.loadLast()) {
+            this.setState({
+                ...this.state,
+                play: true,
+                playback: true,
+                fail: false, // avoid the jazz sound playing with every blink
+            });
+
+            // supplying true signifies we will skip playing the game after playback
+            this.doPlayback(true);
+        }
     }
 
-    doPlayback() {
+    replayLongest() {
+        if (this.sequence.loadLongest()) {
+            this.setState({
+                ...this.state,
+                play: true,
+                playback: true,
+                fail: false, // avoid the jazz sound playing with every blink
+            });
+
+            // supplying true signifies we will skip playing the game after playback
+            this.doPlayback(true);
+        }
+    }
+
+    doPlayback(skipWait) {
         this.playbackTimer.start(() => {
             this.setState({
                 ...this.state,
@@ -111,15 +135,19 @@ class Simon extends React.Component {
 
             return this.sequence.hasNext();
         }, () => {
+            // if skip wait is supplied when this function is called and it is truty
+            // then we will no play or start waiting after the playback sequence.
             this.setState({
                 ...this.state,
-                play: true,
+                play: !skipWait,
                 highlight: false,
                 add: false,
                 playback: false,
             });
 
-            this.doWait();
+            if (!skipWait) {
+                this.doWait();
+            }
         }, this.sequence.getCount());
     }
 
@@ -356,7 +384,23 @@ class Simon extends React.Component {
         let start = this.start.bind(this);
 
         return (
-            <Start onClick={() => start()} />
+            <Play name="Start" onClick={() => start()} isDisabled={false} />
+        );
+    }
+
+    renderPlayLast() {
+        let play = this.replayLast.bind(this);
+
+        return (
+            <Play name="Play Last" onClick={() => play()} isDisabled={!this.sequence.hasLast() || this.state.play} />
+        );
+    }
+
+    renderPlayLongest() {
+        let play = this.replayLongest.bind(this);
+
+        return (
+            <Play name="Play Longest" onClick={() => play()} isDisabled={!this.sequence.hasLast() || this.state.play} />
         );
     }
 
@@ -371,7 +415,6 @@ class Simon extends React.Component {
             <Sound url={process.env.PUBLIC_URL + "/wrong-answer.mp3"}
                 playStatus={this.state.fail? Sound.status.PLAYING : Sound.status.STOPPED}
                 volume={25}
-                onFinishedPlaying={() => this.handleSoundFinished()}
                 />
         );
     }
@@ -390,7 +433,11 @@ class Simon extends React.Component {
             <div>
                 {this.renderJazz()}
                 <div className="status">{status}</div>
-                {this.renderStart()}
+                <div className="board-row">
+                    {this.renderStart()}
+                    {this.renderPlayLast()}
+                    {this.renderPlayLongest()}
+                </div>
                 {this.renderLevelSelect()}
                 {this.renderModeSelect()}
                 <div className="board-row">
