@@ -17,13 +17,6 @@ function Border(props) {
     );
 }
 
-function ActiveLense(props) {
-    return (
-        <button className={props.class + "-active"}>
-        </button>
-    );
-}
-
 function Start(props) {
     return (
         <button onClick={props.onClick}>Start</button>
