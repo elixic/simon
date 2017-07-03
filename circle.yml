@@ -1,0 +1,23 @@
+machine:
+  node:
+    version: 6
+
+dependencies:
+  override:
+    - yarn
+  cache_directories:
+    - ~/.cache/yarn
+
+test:
+  override:
+    - yarn test
+
+general:
+  artifacts:
+    - "build"
+
+deployment:
+  integration:
+    branch: master
+    commands:
+      - aws s3 sync build s3://simon.isaacflemming.com.us-west.s3.amazonaws.com --delete
