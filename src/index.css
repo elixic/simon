@@ -50,19 +50,19 @@ ol, ul {
 }
 
 .lense.red {
-    background-color: rgb(235, 5, 5);
+    background-color: rgba(255, 0, 0, 0.5);
 }
 
 .lense.blue {
-    background-color: rgb(5, 5, 205);
+    background-color: rgba(0, 0, 255, 0.5);
 }
 
 .lense.green {
-    background-color: rgb(5, 235, 5);
+    background-color: rgba(0, 255, 0, 0.5);
 }
 
 .lense.yellow {
-    background-color: rgb(235, 235, 5);
+    background-color: rgba(255, 255, 0, 0.5);
 }
 
 .lense.red:active {
@@ -82,11 +82,11 @@ ol, ul {
 }
 
 .lense.yellow:active {
-    background-color: rgb(255, 255, 0);
+    background-color: rgb(255, 255, 10);
 }
 
 .lense.yellow-active {
-    background-color: rgb(255, 255, 0);
+    background-color: rgb(255, 255, 10);
 }
 
 .lense.blue:active {
