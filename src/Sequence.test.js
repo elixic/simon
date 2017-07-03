@@ -73,6 +73,22 @@ it('can return the next number in the sequence', () => {
     expect(instance.getNext()).toEqual(3);
 });
 
+it('will reeturn all values added to a sequence', () => {
+    const instance = new Sequence();
+    const source = [0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3];
+
+    for(let i = 0; i < source.length; i++) {
+        instance.add(source[i]);
+    }
+
+    expect(instance.getCount()).toEqual(source.length);
+
+    for(let i = 0; i < source.length; i++) {
+        expect(instance.getCurrent()).toEqual(source[i]);
+        instance.moveNext();
+    }
+});
+
 it('will return undefined when calling get current on an empty sequence', () => {
     const instance = new Sequence();
 
@@ -178,11 +194,10 @@ it('can recall the previous sequence', () => {
 
     expect(instance.getCount()).toEqual(count);
 
-    do {
+    while(instance.getCurrent()) {
         previous.push(instance.getCurrent());
         instance.moveNext();
-        position++;
-    } while(position < count);
+    }
 
     expect(previous.length).toEqual(instance.getCount());
 
