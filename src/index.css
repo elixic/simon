@@ -35,7 +35,7 @@ ol, ul {
     height: 200px;
 }
 
-.lense {
+.lens {
     margin: 0;
     padding: 0;
     border: none;
@@ -49,51 +49,51 @@ ol, ul {
     padding-right: 5px;
 }
 
-.lense.red {
+.lens.red {
     background-color: rgba(255, 0, 0, 0.5);
 }
 
-.lense.blue {
+.lens.blue {
     background-color: rgba(0, 0, 255, 0.5);
 }
 
-.lense.green {
+.lens.green {
     background-color: rgba(0, 255, 0, 0.5);
 }
 
-.lense.yellow {
+.lens.yellow {
     background-color: rgba(255, 255, 0, 0.5);
 }
 
-.lense.red:active {
+.lens.red:active {
     background-color: rgb(255, 0, 0);
 }
 
-.lense.red-active {
+.lens.red-active {
     background-color: rgb(255, 0, 0);
 }
 
-.lense.green:active {
+.lens.green:active {
     background-color: rgb(0, 255, 0);
 }
 
-.lense.green-active {
+.lens.green-active {
     background-color: rgb(0, 255, 0);
 }
 
-.lense.yellow:active {
+.lens.yellow:active {
     background-color: rgb(255, 255, 10);
 }
 
-.lense.yellow-active {
+.lens.yellow-active {
     background-color: rgb(255, 255, 10);
 }
 
-.lense.blue:active {
+.lens.blue:active {
     background-color: rgb(0, 0, 255);
 }
 
-.lense.blue-active {
+.lens.blue-active {
     background-color: rgb(0, 0, 255);
 }
 
@@ -121,11 +121,11 @@ ol, ul {
     border-bottom-right-radius: 100%;
 }
 
-.lense:focus {
+.lens:focus {
     outline: none;
 }
 
-.kbd-navigation .lense:focus {
+.kbd-navigation .lens:focus {
     background: #ddd;
 }
 

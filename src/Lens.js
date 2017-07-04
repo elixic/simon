@@ -3,29 +3,29 @@ import React from 'react';
 import './index.css';
 
 function getClass(position, isActive) {
-    let lenseClass = "";
+    let lensClass = "";
 
     if (position === "tl") {
-        lenseClass = "lense top-left red";
+        lensClass = "lens top-left red";
     }
 
     if (position === "tr") {
-        lenseClass = "lense top-right green";
+        lensClass = "lens top-right green";
     }
 
     if (position === "bl") {
-        lenseClass = "lense bottom-left yellow";
+        lensClass = "lens bottom-left yellow";
     }
 
     if (position === "br") {
-        lenseClass = "lense bottom-right blue";
+        lensClass = "lens bottom-right blue";
     }
 
     if (isActive) {
-        return lenseClass + "-active";
+        return lensClass + "-active";
     }
 
-    return lenseClass;
+    return lensClass;
 }
 
 function isMe(position, code) {
@@ -64,7 +64,7 @@ function setKeydownEventListener(position, handler, that) {
     });
 }
 
-class Lense extends React.Component {
+class Lens extends React.Component {
     constructor(props) {
         super(props);
 
@@ -105,4 +105,4 @@ class Lense extends React.Component {
     }
 }
 
-export default Lense;
+export default Lens;

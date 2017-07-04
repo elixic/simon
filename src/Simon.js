@@ -1,7 +1,7 @@
 import React from 'react';
 import Sound from 'react-sound';
 
-import Lense from './Lense';
+import Lens from './Lens';
 
 import Logic from './Logic';
 import PlaybackTimer from './PlaybackTimer';
@@ -353,14 +353,14 @@ class Simon extends React.Component {
         }
     }
 
-    renderLense(position, i) {
+    renderLens(position, i) {
         let active = this.state.highlight && this.sequence.matchesCurrent(i);
         let handleClick = this.handleClick.bind(this);
         let onClick = () => {
             handleClick(i);
         };
 
-        return (<Lense position={position} active={active} onClick={onClick} />);
+        return (<Lens position={position} active={active} onClick={onClick} />);
     }
 
     renderModeSelect() {
@@ -438,9 +438,9 @@ class Simon extends React.Component {
                 {this.renderLevelSelect()}
                 {this.renderModeSelect()}
                 <div className="board-row">
-                    {this.renderLense("tl", 0)}
+                    {this.renderLens("tl", 0)}
                     {this.renderBorder("border border-vertical")}
-                    {this.renderLense("tr", 1)}
+                    {this.renderLens("tr", 1)}
                 </div>
                 <div className="board-row">
                     {this.renderBorder("border border-horizontal")}
@@ -448,9 +448,9 @@ class Simon extends React.Component {
                     {this.renderBorder("border border-horizontal")}
                 </div>
                 <div className="board-row">
-                    {this.renderLense("bl", 2)}
+                    {this.renderLens("bl", 2)}
                     {this.renderBorder("border border-vertical")}
-                    {this.renderLense("br", 3)}
+                    {this.renderLens("br", 3)}
                 </div>
             </div>
         );
