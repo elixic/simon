@@ -5,8 +5,6 @@ import './index.css';
 function getClass(position, isActive) {
     let lenseClass = "";
 
-    console.log("position: " + position + " active: " + isActive? isActive : "undefined");
-
     if (position === "tl") {
         lenseClass = "lense top-left red";
     }
@@ -30,12 +28,49 @@ function getClass(position, isActive) {
     return lenseClass;
 }
 
+function isMe(position, code) {
+    if (position === "tl" && code === 70) {
+        return true;
+    } else if (position === "tr" && code === 72) {
+        return true;
+    } else if (position === "bl" && code === 86) {
+        return true;
+    } else if (position === "br" && code === 66) {
+        return true;
+    }
+}
+
+function setKeyupEventListener(position, that) {
+    window.addEventListener("keyup", (evt) => {
+        if (isMe(position, evt.keyCode)) {
+            that.setState({
+                ...that.state,
+                class: getClass(position, false),
+            });
+        }
+    });
+}
+
+function setKeydownEventListener(position, handler, that) {
+    window.addEventListener("keydown", (evt) => {
+        if (isMe(position, evt.keyCode)) {
+            that.setState({
+                ...that.state,
+                class: getClass(position, true),
+            });
+
+            handler();
+        }
+    });
+}
+
 class Lense extends React.Component {
     constructor(props) {
         super(props);
 
-        console.log(props);
         this.handleClick = this.handleClick.bind(this);
+        setKeydownEventListener(props.position, this.handleClick, this);
+        setKeyupEventListener(props.position, this);
 
         this.state = {
             class: getClass(props.position, props.active),
@@ -59,8 +94,6 @@ class Lense extends React.Component {
     handleClick() {
         if (this.state.onClick) {
             this.state.onClick();
-        } else {
-            console.log("No click handler!");
         }
     }
 

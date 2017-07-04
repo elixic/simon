@@ -360,9 +360,6 @@ class Simon extends React.Component {
             handleClick(i);
         };
 
-        console.log('active: ' + active);
-        console.log('postion: ' + position);
-
         return (<Lense position={position} active={active} onClick={onClick} />);
     }
 
