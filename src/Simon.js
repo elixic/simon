@@ -227,12 +227,17 @@ class Simon extends React.Component {
 
         if (win || fail) {
             this.waitTimer.stop();
-            this.setState({
-                ...this.state,
-                win,
-                fail,
-                play: false,
-            });
+
+            if (win) {
+                this.handleWin();
+            } else {
+                this.setState({
+                    ...this.state,
+                    win: false,
+                    fail: true,
+                    play: false,
+                });
+            }
         }
 
         if (add) {
@@ -256,12 +261,16 @@ class Simon extends React.Component {
                 fail: false,
             });
         } else if (win || fail) {
-            this.setState({
-                ...this.state,
-                play: false,
-                fail,
-                win,
-            });
+            if (win) {
+                this.handleWin();
+            } else {
+                this.setState({
+                    ...this.state,
+                    play: false,
+                    fail,
+                    win,
+                });
+            }
         } else if (!hasNext) {
             this.setState({
                 ...this.state,
@@ -276,11 +285,16 @@ class Simon extends React.Component {
         if (this.sequence.getSkipCount() < 3) {
             this.start(true);
         } else {
-            this.handleColorModeWin();
+            this.handleWin();
         }
     }
 
-    handleColorModeWin() {
+    handleWin() {
+        while(this.sequence.moveNext()) {
+            // nothing, just making sure we are at the Last
+            // button pressed.
+        }
+
         let blink = () => {
             this.setState({
                 ...this.status,
@@ -301,9 +315,6 @@ class Simon extends React.Component {
             });
         }
 
-        // we'll set it so the only value that is avaialble for highlighting is the winning value.
-        this.sequence.reset(true);
-        this.sequence.add();
         this.blinkTimer.blink(blink, pause);
     }
 
