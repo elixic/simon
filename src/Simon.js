@@ -120,6 +120,7 @@ class Simon extends React.Component {
             this.setState({
                 ...this.state,
                 play: true,
+                fail: false,
                 highlight: false,
                 playback: true,
             });
@@ -129,6 +130,7 @@ class Simon extends React.Component {
             this.setState({
                 ...this.state,
                 play: true,
+                fail: false,
                 highlight: true,
                 plaback: true,
             });
@@ -139,6 +141,7 @@ class Simon extends React.Component {
             // then we will no play or start waiting after the playback sequence.
             this.setState({
                 ...this.state,
+                fail: false,
                 play: !skipWait,
                 highlight: false,
                 add: false,
@@ -267,8 +270,8 @@ class Simon extends React.Component {
                 this.setState({
                     ...this.state,
                     play: false,
-                    fail,
-                    win,
+                    fail: true,
+                    win: false,
                 });
             }
         } else if (!hasNext) {
@@ -421,7 +424,7 @@ class Simon extends React.Component {
     renderJazz() {
         return (
             <Sound url={process.env.PUBLIC_URL + "/wrong-answer.mp3"}
-                playStatus={this.state.fail? Sound.status.PLAYING : Sound.status.STOPPED}
+                playStatus={this.state.fail && !this.state.play? Sound.status.PLAYING : Sound.status.STOPPED}
                 volume={25}
                 />
         );

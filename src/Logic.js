@@ -1,4 +1,4 @@
-const _LEVELS = [8, 14, 20, 31];
+const _LEVELS = [8, 14, 20, 8];
 
 class Logic {
     constructor() {
